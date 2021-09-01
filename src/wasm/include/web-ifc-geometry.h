@@ -1054,7 +1054,7 @@ namespace webifc
 			auto& line = _loader.GetLine(lineID);
 			switch (line.ifcType)
 			{
-			case ifc2x4::IFCPRESENTATIONSTYLEASSIGNMENT:
+/* 			case ifc2x4::IFCPRESENTATIONSTYLEASSIGNMENT:
 			{
 				_loader.MoveToArgumentOffset(line, 0);
 				auto ifcPresentationStyleSelects = _loader.GetSetArgument();
@@ -1072,7 +1072,7 @@ namespace webifc
 				}
 
 				return false;
-			}
+			} */
 			case ifc2x4::IFCSURFACESTYLE:
 			{
 				_loader.MoveToArgumentOffset(line, 2);
