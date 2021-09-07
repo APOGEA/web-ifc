@@ -219,6 +219,7 @@ console.log(tmap["IfcActionSourceTypeEnum"]);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const TS_OUTPUT_FILE = "../IFC4x3.ts";
+const TS_OUTPUT_HELPER_FILE = "../ifc2x4_helper.ts";
 
 let buffer = [];
 
@@ -488,6 +489,7 @@ elements.forEach((entity) => {
 });
 
 fs.writeFileSync(TS_OUTPUT_FILE, buffer.join("\n"));
+fs.writeFileSync(TS_OUTPUT_HELPER_FILE, buffer.join("\n"));
 
 /////////////////////////////////////////////////////////////
 //////////// CRC32 GEN //////////////////////////////////////
