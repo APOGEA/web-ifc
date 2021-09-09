@@ -21,11 +21,19 @@ std::string ReadFile(std::wstring filename)
 
 void SpecificLoadTest(webifc::IfcLoader& loader, webifc::IfcGeometryLoader& geometryLoader, uint64_t num)
 {
+    std::cout << " Break point 4 " << std::endl;  
+
     auto walls = loader.GetExpressIDsWithType(ifc2x4::IFCSLAB);
+
+    std::cout << " Break point 5 " << std::endl;  
 
     bool writeFiles = true;
     
+    std::cout << " Break point 6 " << std::endl;  
+
     auto mesh = geometryLoader.GetMesh(num);
+
+    std::cout << " Break point 7 " << std::endl;  
 
     if (writeFiles)
     {
@@ -222,7 +230,7 @@ void TestTriangleDecompose()
 int main()
 {
     std::cout << "Hello web IFC test!\n";
-
+    std::cout << "Prueba APOGEA!\n";
     // TestTriangleDecompose();
 
     // return 0;
@@ -241,8 +249,15 @@ int main()
 
     webifc::IfcLoader loader(set);
 
+    std::cout << "Break point 1 " << std::endl;  
+
     auto start = webifc::ms();
+
+    std::cout << "Break point 2 " << std::endl;  
+
     loader.LoadFile(content);
+
+    std::cout << "Break point 3 " << std::endl;  
 
     //std::ofstream outputStream(L"D:/web-ifc/benchmark/ifcfiles/output.ifc");
     //outputStream << loader.DumpAsIFC();
@@ -254,6 +269,8 @@ int main()
     webifc::IfcGeometryLoader geometryLoader(loader);
 
     start = webifc::ms();
+
+    std::cout << "Before reading specific test OK " << std::endl;  
 
     SpecificLoadTest(loader, geometryLoader, 57672);
     //auto meshes = LoadAllTest(loader, geometryLoader);

@@ -134,6 +134,8 @@ namespace webifc
 		{
 			if (_loader.GetSettings().MESH_CACHE)
 			{
+    			std::cout << " Break point 7A " << std::endl;  
+				
 				auto it = _expressIDToMesh.find(expressID);
 
 				if (it == _expressIDToMesh.end())
@@ -206,9 +208,8 @@ namespace webifc
 		GeometryStatistics _statistics;
 
 		IfcComposedMesh GetMeshByLine(uint32_t lineID)
-		{
+		{		
 			auto& line = _loader.GetLine(lineID);
-
 			bool hasColor = false;
 			glm::dvec4 styledItemColor(1);
 			auto& styledItems = _loader.GetStyledItems();
