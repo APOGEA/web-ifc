@@ -1017,7 +1017,7 @@ namespace ifc2x4 {
 			case 4266260250: return true;
 			case 3752311538: return true;
 			case 1545765605: return true;
-			case 536804194: return true;
+			//case 536804194: return true;
 			case 2879124712: return true;
 			case 317615605: return true;
 			case 1662888072: return true;
@@ -1378,7 +1378,7 @@ namespace ifc2x4 {
 			case 4266260250: return "IFCALIGNMENTCANT";
 			case 3752311538: return "IFCALIGNMENTCANTSEGMENT";
 			case 1545765605: return "IFCALIGNMENTHORIZONTAL";
-			case 536804194: return "IFCALIGNMENTHORIZONTALSEGMENT";
+			//case 536804194: return "IFCALIGNMENTHORIZONTALSEGMENT";
 			case 2879124712: return "IFCALIGNMENTPARAMETERSEGMENT";
 			case 317615605: return "IFCALIGNMENTSEGMENT";
 			case 1662888072: return "IFCALIGNMENTVERTICAL";

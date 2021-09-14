@@ -134,8 +134,6 @@ namespace webifc
 		{
 			if (_loader.GetSettings().MESH_CACHE)
 			{
-    			std::cout << " Break point 7A " << std::endl;  
-				
 				auto it = _expressIDToMesh.find(expressID);
 
 				if (it == _expressIDToMesh.end())
@@ -346,6 +344,12 @@ namespace webifc
 			{
 				switch (line.ifcType)
 				{
+				case ifc2x4::IFCALIGNMENTHORIZONTALSEGMENT:
+				{
+					_loader.MoveToArgumentOffset(line, 8);
+					std::string type = _loader.GetStringArgument();
+					return mesh;
+				}
 				case ifc2x4::IFCMAPPEDITEM:
 				{
 					_loader.MoveToArgumentOffset(line, 0);
@@ -2009,7 +2013,6 @@ namespace webifc
 					glm::dvec4(pos, 1)
 				);
 			}
-
 			default:
 				_loader.ReportError({ LoaderErrorType::UNSUPPORTED_TYPE, "unexpected placement type", line.expressID, line.ifcType });
 				break;
