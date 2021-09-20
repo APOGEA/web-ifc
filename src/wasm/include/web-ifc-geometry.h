@@ -325,48 +325,84 @@ namespace webifc
 					{
 					case 1: //LINE
 					{
-						return;
+						IfcCurve<2> curve;
+						glm::dvec2 Direction(
+							glm::sin(ifcStartDirection),
+							glm::cos(ifcStartDirection));
+						glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
+
+						glm::dvec2 Normal2D = glm::normalize(glm::dvec2(StartPoint.y - EndPoint.y, EndPoint.x - StartPoint.x));
+						glm::dvec2 StartPoint1 = StartPoint + Normal2D * 0.01;
+						glm::dvec2 EndPoint1 = EndPoint + Normal2D * 0.01;
+						glm::dvec2 StartPoint2 = StartPoint - Normal2D * 0.01;
+						glm::dvec2 EndPoint2 = EndPoint - Normal2D * 0.01;
+
+						curve.Add(StartPoint1);
+						curve.Add(EndPoint1);
+						curve.Add(EndPoint2);
+						curve.Add(StartPoint2);
+
+						profile.curve = curve;
+						glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
+
+						IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+						_expressIDToGeometry[line.expressID] = geom;
+						mesh.expressID = line.expressID;
+						mesh.hasGeometry = true;
+
+						break;
 					}
 					case 2:
 					{
-						return;
+						IfcCurve<2> curve;
+
+						double span = (SegmentLength / StartRadiusOfCurvature) * 2 * CONST_PI;
+
+						auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), 0, span, true);
+
+						for (auto &pt2D : curve2D.points)
+						{
+							curve.Add(pt2D);
+						}
+
+						profile.curve = curve;
+						glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
+
+						IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+						_expressIDToGeometry[line.expressID] = geom;
+						mesh.expressID = line.expressID;
+						mesh.hasGeometry = true;
+
+						break;
 					}
 					case 3:
 					{
-						return;
+						break;
 					}
 					case 4:
 					{
-						return;
+						break;
 					}
 					case 5:
 					{
-						return;
+						break;
 					}
 					case 6:
 					{
-						return;
+						break;
 					}
 					case 7:
 					{
-						return;
+						break;
 					}
 					case 8:
 					{
-						return;
+						break;
 					}
 					case 9:
 					{
-						return;
+						break;
 					}
-
-					//profile.curve = GetCircleCurve(radius, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM);
-
-					//IfcGeometry geom = Sweep(profile, directrix);
-					//_expressIDToGeometry[line.expressID] = geom;
-					mesh.expressID = line.expressID;
-					mesh.hasGeometry = true;
-
 					}
 				}
 
@@ -1628,6 +1664,7 @@ namespace webifc
 				std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
 
 				uint32_t offset = 0;
+
 				bool winding = GetWindingOfTriangle(geom.GetPoint(offset + indices[0]), geom.GetPoint(offset + indices[1]), geom.GetPoint(offset + indices[2]));
 				bool flipWinding = !winding;
 
