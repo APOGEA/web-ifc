@@ -89,7 +89,10 @@
         "compare": "cpp",
         "memory_resource": "cpp",
         "numeric": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "charconv": "cpp",
+        "format": "cpp",
+        "forward_list": "cpp"
     },
     "cmake.configureOnOpen": true,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",

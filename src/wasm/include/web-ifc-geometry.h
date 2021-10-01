@@ -326,12 +326,13 @@ namespace webifc
 					case 1: //LINE
 					{
 						IfcCurve<2> curve;
+						ifcStartDirection = ifcStartDirection;
 						glm::dvec2 Direction(
-							glm::sin(ifcStartDirection),
-							glm::cos(ifcStartDirection));
+							glm::cos(ifcStartDirection),
+							glm::sin(ifcStartDirection));
 						glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
 
-						glm::dvec2 Normal2D = glm::normalize(glm::dvec2(StartPoint.y - EndPoint.y, EndPoint.x - StartPoint.x));
+						glm::dvec2 Normal2D = glm::normalize(glm::dvec2((StartPoint.y - EndPoint.y), (EndPoint.x - StartPoint.x)));
 						glm::dvec2 StartPoint1 = StartPoint + Normal2D * 0.01;
 						glm::dvec2 EndPoint1 = EndPoint + Normal2D * 0.01;
 						glm::dvec2 StartPoint2 = StartPoint - Normal2D * 0.01;
@@ -355,14 +356,29 @@ namespace webifc
 					case 2:
 					{
 						IfcCurve<2> curve;
+						double span = (SegmentLength / StartRadiusOfCurvature);
+						ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
 
-						double span = (SegmentLength / StartRadiusOfCurvature) * 2 * CONST_PI;
+						bool sw = true;
+						if (StartRadiusOfCurvature < 0)
+						{
+							sw = false;
+							span = -span;
+							ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
+						}
 
-						auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), 0, span, true);
-
+						auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), ifcStartDirection, ifcStartDirection + span, sw);
+						glm::dvec2 desp = glm::dvec2(StartPoint.x - curve2D.points[0].x, StartPoint.y - curve2D.points[0].y);
 						for (auto &pt2D : curve2D.points)
 						{
-							curve.Add(pt2D);
+							glm::dvec2 Normal2D_1 = glm::normalize(glm::dvec2(pt2D.x - StartPoint.x, pt2D.y - StartPoint.y));
+							curve.Add((pt2D + Normal2D_1 * 0.01) + desp);
+						}
+						std::reverse(curve2D.points.begin(), curve2D.points.end());
+						for (auto &pt2D : curve2D.points)
+						{
+							glm::dvec2 Normal2D_1 = glm::normalize(glm::dvec2(pt2D.x - StartPoint.x, pt2D.y - StartPoint.y));
+							curve.Add((pt2D - Normal2D_1 * 0.01) + desp);
 						}
 
 						profile.curve = curve;
