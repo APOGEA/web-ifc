@@ -326,27 +326,36 @@ namespace webifc
 					case 1: //LINE
 					{
 						IfcCurve<2> curve;
-						ifcStartDirection = ifcStartDirection;
 						glm::dvec2 Direction(
 							glm::cos(ifcStartDirection),
 							glm::sin(ifcStartDirection));
 						glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
 
-						glm::dvec2 Normal2D = glm::normalize(glm::dvec2((StartPoint.y - EndPoint.y), (EndPoint.x - StartPoint.x)));
-						glm::dvec2 StartPoint1 = StartPoint + Normal2D * 0.01;
-						glm::dvec2 EndPoint1 = EndPoint + Normal2D * 0.01;
-						glm::dvec2 StartPoint2 = StartPoint - Normal2D * 0.01;
-						glm::dvec2 EndPoint2 = EndPoint - Normal2D * 0.01;
+						//glm::dvec2 Normal2D = glm::normalize(glm::dvec2((StartPoint.y - EndPoint.y), (EndPoint.x - StartPoint.x)));
+						//glm::dvec2 StartPoint1 = StartPoint + Normal2D * 0.01;
+						//glm::dvec2 EndPoint1 = EndPoint + Normal2D * 0.01;
+						//glm::dvec2 StartPoint2 = StartPoint - Normal2D * 0.01;
+						//glm::dvec2 EndPoint2 = EndPoint - Normal2D * 0.01;
 
-						curve.Add(StartPoint1);
-						curve.Add(EndPoint1);
-						curve.Add(EndPoint2);
-						curve.Add(StartPoint2);
+						//curve.Add(StartPoint1);
+						//curve.Add(EndPoint1);
+						//curve.Add(EndPoint2);
+						//curve.Add(StartPoint2);
 
-						profile.curve = curve;
-						glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
+						//profile.curve = curve;
+						//glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
 
-						IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+						//IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+
+						glm::dvec4 iPoint = glm::dvec4(StartPoint.x,StartPoint.y,0,1);
+						glm::dvec4 jPoint = glm::dvec4(StartPoint.x,StartPoint.y,0,1);
+						glm::dvec3 Normal = glm::dvec3(0, 0, 1);
+						IfcGeometry geom;
+						geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
+						geom.AddPoint(iPoint,Normal);
+						geom.AddPoint(jPoint,Normal);
+						geom.AddPoint(jPoint,Normal);
+
 						_expressIDToGeometry[line.expressID] = geom;
 						mesh.expressID = line.expressID;
 						mesh.hasGeometry = true;
