@@ -110,10 +110,15 @@ namespace webifc
 					_isCoordinated = true;
 				}
 
+				auto& geom = _expressIDToGeometry[composedMesh.expressID];
+				if (!geom.normalized) geom.Normalize();
+
 				geometry.color = newParentColor;
-				geometry.transformation = _coordinationMatrix * newMatrix;
+				geometry.transformation = _coordinationMatrix * newMatrix * glm::translate(geom.min);
 				geometry.SetFlatTransformation();
 				geometry.geometryExpressID = composedMesh.expressID;
+
+
 
 				flatMesh.geometries.push_back(geometry);
 			}
