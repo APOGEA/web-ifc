@@ -5,6 +5,7 @@
 import * as THREE from "three";
 import { IfcAPI, ms, PlacedGeometry, Color, FlatMesh, IFCSITE } from "../../dist/web-ifc-api";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
+import { Float16BufferAttribute, Float32BufferAttribute } from "three";
   
 export class IfcThree
 {
@@ -36,27 +37,52 @@ export class IfcThree
                 scene.add(this.getPlacedGeometry(modelID, placedGeometries.get(j)));
         }
         */
-
         let geometries = [];
-
+        
         this.ifcAPI.StreamAllMeshes(modelID, (mesh: FlatMesh) => {
             // only during the lifetime of this function call, the geometry is available in memory
             const placedGeometries = mesh.geometries;
 
             for (let i = 0; i < placedGeometries.size(); i++)
             {
+                let Geometrylines = [];
+
                 const placedGeometry = placedGeometries.get(i);
                 let mesh = this.getPlacedGeometry(modelID, placedGeometry);
                 let geom = mesh.geometry.applyMatrix4(mesh.matrix);
-                geometries.push(geom);
+                var x1 = geom.attributes.position.array[3];
+                var x2 = geom.attributes.position.array[6];
+                let y1 = geom.attributes.position.array[4];
+                let y2 = geom.attributes.position.array[7];
+                
+                if ( x1 == x2 && y1 == y2) 
+                {
+                    Geometrylines.push(geom);
+                }
+                else
+                {
+                    geometries.push(geom);
+                }
+
+                if(Geometrylines.length > 0)
+                {
+                    const combinedGeometryLines = BufferGeometryUtils.mergeBufferGeometries(Geometrylines);
+                    let matLines = new THREE.MeshPhongMaterial();
+                    matLines.vertexColors = true;
+                    const mergedLines = new THREE.Line(combinedGeometryLines, matLines);      
+                    scene.add(mergedLines);
+                }
             }
         });
 
-        const combinedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
-        let mat = new THREE.MeshPhongMaterial();
-        mat.vertexColors = true;
-        const mergedMesh = new THREE.Mesh(combinedGeometry, mat);
-        scene.add(mergedMesh);
+        if(geometries.length > 0)
+        {
+            const combinedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+            let mat = new THREE.MeshPhongMaterial();
+            mat.vertexColors = true;
+            const mergedMesh = new THREE.Mesh(combinedGeometry, mat);      
+            scene.add(mergedMesh);
+        }
 
         console.log(`Uploading took ${ms() - startUploadingTime} ms`);
     }

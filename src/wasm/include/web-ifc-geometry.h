@@ -293,141 +293,131 @@ namespace webifc
 					_loader.MoveToArgumentOffset(line, 7);
 					ifcAlignment = _loader.GetRefArgument();
 
-					//Place in function
-
+					// Place in function
 					uint32_t lineID = _loader.ExpressIDToLineID(ifcAlignment);
 					auto &line = _loader.GetLine(lineID);
-					_loader.MoveToArgumentOffset(line, 8);
-					std::string type = _loader.GetStringArgument();
 
-					_loader.MoveToArgumentOffset(line, 2);
-					uint32_t ifcStartPoint = _loader.GetRefArgument();
-					glm::dvec2 StartPoint = GetCartesianPoint2D(ifcStartPoint);
-
-					_loader.MoveToArgumentOffset(line, 3);
-					double ifcStartDirection = _loader.GetDoubleArgument();
-
-					_loader.MoveToArgumentOffset(line, 4);
-					double StartRadiusOfCurvature = _loader.GetDoubleArgument();
-
-					_loader.MoveToArgumentOffset(line, 5);
-					double EndRadiusOfCurvature = _loader.GetDoubleArgument();
-
-					_loader.MoveToArgumentOffset(line, 6);
-					double SegmentLength = _loader.GetDoubleArgument();
-
-					_loader.MoveToArgumentOffset(line, 7);
-					double GravityCenterLineHeight = _loader.GetDoubleArgument();
-
-					IfcProfile profile;
-
-					switch (curve_type_case.at(type))
+					if (line.ifcType == ifc2x4::IFCALIGNMENTHORIZONTALSEGMENT)
 					{
-					case 1: //LINE
-					{
-						IfcCurve<2> curve;
-						glm::dvec2 Direction(
-							glm::cos(ifcStartDirection),
-							glm::sin(ifcStartDirection));
-						glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
+						_loader.MoveToArgumentOffset(line, 8);
+						std::string type = _loader.GetStringArgument();
 
-						//glm::dvec2 Normal2D = glm::normalize(glm::dvec2((StartPoint.y - EndPoint.y), (EndPoint.x - StartPoint.x)));
-						//glm::dvec2 StartPoint1 = StartPoint + Normal2D * 0.01;
-						//glm::dvec2 EndPoint1 = EndPoint + Normal2D * 0.01;
-						//glm::dvec2 StartPoint2 = StartPoint - Normal2D * 0.01;
-						//glm::dvec2 EndPoint2 = EndPoint - Normal2D * 0.01;
+						_loader.MoveToArgumentOffset(line, 2);
+						uint32_t ifcStartPoint = _loader.GetRefArgument();
+						glm::dvec2 StartPoint = GetCartesianPoint2D(ifcStartPoint);
 
-						//curve.Add(StartPoint1);
-						//curve.Add(EndPoint1);
-						//curve.Add(EndPoint2);
-						//curve.Add(StartPoint2);
+						_loader.MoveToArgumentOffset(line, 3);
+						double ifcStartDirection = _loader.GetDoubleArgument();
 
-						//profile.curve = curve;
-						//glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
+						_loader.MoveToArgumentOffset(line, 4);
+						double StartRadiusOfCurvature = _loader.GetDoubleArgument();
 
-						//IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+						_loader.MoveToArgumentOffset(line, 5);
+						double EndRadiusOfCurvature = _loader.GetDoubleArgument();
 
-						glm::dvec4 iPoint = glm::dvec4(StartPoint.x,StartPoint.y,0,1);
-						glm::dvec4 jPoint = glm::dvec4(StartPoint.x,StartPoint.y,0,1);
-						glm::dvec3 Normal = glm::dvec3(0, 0, 1);
-						IfcGeometry geom;
-						geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
-						geom.AddPoint(iPoint,Normal);
-						geom.AddPoint(jPoint,Normal);
-						geom.AddPoint(jPoint,Normal);
+						_loader.MoveToArgumentOffset(line, 6);
+						double SegmentLength = _loader.GetDoubleArgument();
 
-						_expressIDToGeometry[line.expressID] = geom;
-						mesh.expressID = line.expressID;
-						mesh.hasGeometry = true;
+						_loader.MoveToArgumentOffset(line, 7);
+						double GravityCenterLineHeight = _loader.GetDoubleArgument();
 
-						break;
-					}
-					case 2:
-					{
-						IfcCurve<2> curve;
-						double span = (SegmentLength / StartRadiusOfCurvature);
-						ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
+						IfcProfile profile;
 
-						bool sw = true;
-						if (StartRadiusOfCurvature < 0)
+						switch (curve_type_case.at(type))
 						{
-							sw = false;
-							span = -span;
+						case 1: // LINE
+						{
+							IfcCurve<2> curve;
+							glm::dvec2 Direction(
+								glm::cos(ifcStartDirection),
+								glm::sin(ifcStartDirection));
+							glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
+							glm::dvec4 iPoint = glm::dvec4(StartPoint.x, StartPoint.y, 0, 1);
+							glm::dvec4 jPoint = glm::dvec4(EndPoint.x, EndPoint.y, 0, 1);
+							glm::dvec3 Normal = glm::dvec3(0, 0, 1);
+							IfcGeometry geom;
+							geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
+							geom.AddPoint(iPoint, Normal);
+							geom.AddPoint(jPoint, Normal);
+							geom.AddPoint(jPoint, Normal);
+							_expressIDToGeometry[line.expressID] = geom;
+							mesh.expressID = line.expressID;
+							mesh.hasGeometry = true;
+
+							break;
+						}
+						case 2: // Arc
+						{
+							IfcCurve<2> curve;
+							double span = (SegmentLength / StartRadiusOfCurvature);
 							ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
-						}
 
-						auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), ifcStartDirection, ifcStartDirection + span, sw);
-						glm::dvec2 desp = glm::dvec2(StartPoint.x - curve2D.points[0].x, StartPoint.y - curve2D.points[0].y);
-						for (auto &pt2D : curve2D.points)
+							bool sw = true;
+							if (StartRadiusOfCurvature < 0)
+							{
+								sw = false;
+								span = -span;
+								ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
+							}
+
+							auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), ifcStartDirection, ifcStartDirection + span, sw);
+							glm::dvec2 desp = glm::dvec2(StartPoint.x - curve2D.points[0].x, StartPoint.y - curve2D.points[0].y);
+							IfcGeometry geom;
+							int count = 0;
+							for (auto &pt2D : curve2D.points)
+							{
+								if (count < curve2D.points.size() - 1)
+								{
+									glm::dvec2 nextPoint = curve2D.points[count + 1];
+									glm::dvec4 iPoint = glm::dvec4(pt2D.x + desp.x, pt2D.y + desp.y, 0, 1);
+									glm::dvec4 jPoint = glm::dvec4(nextPoint.x + desp.x, nextPoint.y + desp.y, 0, 1);
+									glm::dvec3 Normal = glm::dvec3(0, 0, 1);
+									geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
+									geom.AddPoint(iPoint, Normal);
+									geom.AddPoint(jPoint, Normal);
+									geom.AddPoint(jPoint, Normal);
+								}
+								count++;
+							}
+							_expressIDToGeometry[line.expressID] = geom;
+							mesh.expressID = line.expressID;
+							mesh.hasGeometry = true;
+
+							break;
+						}
+						case 3:
 						{
-							glm::dvec2 Normal2D_1 = glm::normalize(glm::dvec2(pt2D.x - StartPoint.x, pt2D.y - StartPoint.y));
-							curve.Add((pt2D + Normal2D_1 * 0.01) + desp);
+							break;
 						}
-						std::reverse(curve2D.points.begin(), curve2D.points.end());
-						for (auto &pt2D : curve2D.points)
+						case 4:
 						{
-							glm::dvec2 Normal2D_1 = glm::normalize(glm::dvec2(pt2D.x - StartPoint.x, pt2D.y - StartPoint.y));
-							curve.Add((pt2D - Normal2D_1 * 0.01) + desp);
+							break;
 						}
+						case 5:
+						{
+							break;
+						}
+						case 6:
+						{
+							break;
+						}
+						case 7:
+						{
+							break;
+						}
+						case 8:
+						{
+							break;
+						}
+						case 9:
+						{
+							break;
+						}
+						}
+					}
+					if (line.ifcType == ifc2x4::IFCALIGNMENTVERTICALSEGMENT)
+					{
 
-						profile.curve = curve;
-						glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
-
-						IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
-						_expressIDToGeometry[line.expressID] = geom;
-						mesh.expressID = line.expressID;
-						mesh.hasGeometry = true;
-
-						break;
-					}
-					case 3:
-					{
-						break;
-					}
-					case 4:
-					{
-						break;
-					}
-					case 5:
-					{
-						break;
-					}
-					case 6:
-					{
-						break;
-					}
-					case 7:
-					{
-						break;
-					}
-					case 8:
-					{
-						break;
-					}
-					case 9:
-					{
-						break;
-					}
 					}
 				}
 
@@ -630,9 +620,9 @@ namespace webifc
 					bool flipWinding = false;
 					if (agreement == "T")
 					{
-						//extrusionNormal *= -1;
-						//planeNormal *= -1;
-						//flipWinding = true;
+						// extrusionNormal *= -1;
+						// planeNormal *= -1;
+						// flipWinding = true;
 					}
 
 					IfcProfile profile;
@@ -640,7 +630,7 @@ namespace webifc
 					profile.curve = curve;
 
 					auto geom = Extrude(profile, extrusionNormal, EXTRUSION_DISTANCE_HALFSPACE_M / _loader.GetLinearScalingFactor(), planeNormal, planePosition);
-					//auto geom = Extrude(profile, surface.transformation, extrusionNormal, EXTRUSION_DISTANCE_HALFSPACE);
+					// auto geom = Extrude(profile, surface.transformation, extrusionNormal, EXTRUSION_DISTANCE_HALFSPACE);
 
 					// @Refactor: duplicate of extrudedareasolid
 					if (flipWinding)
@@ -1635,8 +1625,8 @@ namespace webifc
 				}
 			}
 
-			//DumpSVGCurve(directrix.points, glm::dvec3(), L"directrix.html");
-			//DumpIfcGeometry(geom, L"sweep.obj");
+			// DumpSVGCurve(directrix.points, glm::dvec3(), L"directrix.html");
+			// DumpIfcGeometry(geom, L"sweep.obj");
 
 			return geom;
 		}
@@ -1649,7 +1639,7 @@ namespace webifc
 			// build the caps
 			{
 				using Point = std::array<double, 2>;
-				int polygonCount = 1 + profile.holes.size(); //Main profile + holes
+				int polygonCount = 1 + profile.holes.size(); // Main profile + holes
 				std::vector<std::vector<Point>> polygon(polygonCount);
 
 				glm::dvec3 normal = dir;
@@ -1682,7 +1672,7 @@ namespace webifc
 
 						profile.curve.Add(pt);
 						geom.AddPoint(et, normal);
-						polygon[i + 1].push_back({pt.x, pt.y}); //Index 0 is main profile; see earcut reference
+						polygon[i + 1].push_back({pt.x, pt.y}); // Index 0 is main profile; see earcut reference
 					}
 				}
 
@@ -1753,7 +1743,7 @@ namespace webifc
 			uint32_t capSize = profile.curve.points.size();
 			for (int i = 1; i < capSize; i++)
 			{
-				//https://github.com/tomvandig/web-ifc/issues/5
+				// https://github.com/tomvandig/web-ifc/issues/5
 				if (holesIndicesHash[i])
 				{
 					continue;
@@ -2443,7 +2433,7 @@ namespace webifc
 						vec[1] = radius * std::sin(angle); // negative or not???
 						pos = placement * glm::dvec4(glm::dvec3(vec), 1);
 					}
-					//glm::vec<DIM, glm::f64> pos = placement * glm::vec<DIM + 1, glm::f64>(vec, 1);
+					// glm::vec<DIM, glm::f64> pos = placement * glm::vec<DIM + 1, glm::f64>(vec, 1);
 					curve.Add(pos);
 				}
 
