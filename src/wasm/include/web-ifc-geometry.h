@@ -327,61 +327,61 @@ namespace webifc
 						{
 						case 1: // LINE
 						{
-							IfcCurve<2> curve;
-							glm::dvec2 Direction(
-								glm::cos(ifcStartDirection),
-								glm::sin(ifcStartDirection));
-							glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
-							glm::dvec4 iPoint = glm::dvec4(StartPoint.x, StartPoint.y, 0, 1);
-							glm::dvec4 jPoint = glm::dvec4(EndPoint.x, EndPoint.y, 0, 1);
-							glm::dvec3 Normal = glm::dvec3(0, 0, 1);
-							IfcGeometry geom;
-							geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
-							geom.AddPoint(iPoint, Normal);
-							geom.AddPoint(jPoint, Normal);
-							geom.AddPoint(jPoint, Normal);
-							_expressIDToGeometry[line.expressID] = geom;
-							mesh.expressID = line.expressID;
-							mesh.hasGeometry = true;
+							// IfcCurve<2> curve;
+							// glm::dvec2 Direction(
+							// 	glm::cos(ifcStartDirection),
+							// 	glm::sin(ifcStartDirection));
+							// glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
+							// glm::dvec4 iPoint = glm::dvec4(StartPoint.x, StartPoint.y, 0, 1);
+							// glm::dvec4 jPoint = glm::dvec4(EndPoint.x, EndPoint.y, 0, 1);
+							// glm::dvec3 Normal = glm::dvec3(0, 0, 1);
+							// IfcGeometry geom;
+							// geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
+							// geom.AddPoint(iPoint, Normal);
+							// geom.AddPoint(jPoint, Normal);
+							// geom.AddPoint(jPoint, Normal);
+							// _expressIDToGeometry[line.expressID] = geom;
+							// mesh.expressID = line.expressID;
+							// mesh.hasGeometry = true;
 
 							break;
 						}
 						case 2: // Arc
 						{
-							IfcCurve<2> curve;
-							double span = (SegmentLength / StartRadiusOfCurvature);
-							ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
+							// IfcCurve<2> curve;
+							// double span = (SegmentLength / StartRadiusOfCurvature);
+							// ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
 
-							bool sw = true;
-							if (StartRadiusOfCurvature < 0)
-							{
-								sw = false;
-								span = -span;
-								ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
-							}
+							// bool sw = true;
+							// if (StartRadiusOfCurvature < 0)
+							// {
+							// 	sw = false;
+							// 	span = -span;
+							// 	ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
+							// }
 
-							auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), ifcStartDirection, ifcStartDirection + span, sw);
-							glm::dvec2 desp = glm::dvec2(StartPoint.x - curve2D.points[0].x, StartPoint.y - curve2D.points[0].y);
-							IfcGeometry geom;
-							int count = 0;
-							for (auto &pt2D : curve2D.points)
-							{
-								if (count < curve2D.points.size() - 1)
-								{
-									glm::dvec2 nextPoint = curve2D.points[count + 1];
-									glm::dvec4 iPoint = glm::dvec4(pt2D.x + desp.x, pt2D.y + desp.y, 0, 1);
-									glm::dvec4 jPoint = glm::dvec4(nextPoint.x + desp.x, nextPoint.y + desp.y, 0, 1);
-									glm::dvec3 Normal = glm::dvec3(0, 0, 1);
-									geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
-									geom.AddPoint(iPoint, Normal);
-									geom.AddPoint(jPoint, Normal);
-									geom.AddPoint(jPoint, Normal);
-								}
-								count++;
-							}
-							_expressIDToGeometry[line.expressID] = geom;
-							mesh.expressID = line.expressID;
-							mesh.hasGeometry = true;
+							// auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), ifcStartDirection, ifcStartDirection + span, sw);
+							// glm::dvec2 desp = glm::dvec2(StartPoint.x - curve2D.points[0].x, StartPoint.y - curve2D.points[0].y);
+							// IfcGeometry geom;
+							// int count = 0;
+							// for (auto &pt2D : curve2D.points)
+							// {
+							// 	if (count < curve2D.points.size() - 1)
+							// 	{
+							// 		glm::dvec2 nextPoint = curve2D.points[count + 1];
+							// 		glm::dvec4 iPoint = glm::dvec4(pt2D.x + desp.x, pt2D.y + desp.y, 0, 1);
+							// 		glm::dvec4 jPoint = glm::dvec4(nextPoint.x + desp.x, nextPoint.y + desp.y, 0, 1);
+							// 		glm::dvec3 Normal = glm::dvec3(0, 0, 1);
+							// 		geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
+							// 		geom.AddPoint(iPoint, Normal);
+							// 		geom.AddPoint(jPoint, Normal);
+							// 		geom.AddPoint(jPoint, Normal);
+							// 	}
+							// 	count++;
+							// }
+							// _expressIDToGeometry[line.expressID] = geom;
+							// mesh.expressID = line.expressID;
+							// mesh.hasGeometry = true;
 
 							break;
 						}
@@ -417,7 +417,6 @@ namespace webifc
 					}
 					if (line.ifcType == ifc2x4::IFCALIGNMENTVERTICALSEGMENT)
 					{
-
 					}
 				}
 

@@ -81,6 +81,7 @@ export class IfcThree
             let mat = new THREE.MeshPhongMaterial();
             mat.vertexColors = true;
             const mergedMesh = new THREE.Mesh(combinedGeometry, mat);      
+            console.log(mergedMesh);
             scene.add(mergedMesh);
         }
 

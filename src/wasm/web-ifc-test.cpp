@@ -47,7 +47,7 @@ std::vector<webifc::IfcFlatMesh> LoadAllTest(webifc::IfcLoader& loader, webifc::
         {
             auto mesh = geometryLoader.GetFlatMesh(elements[i]);
 
-            /*
+            
             for (auto& geom : mesh.geometries)
             {
                 if (!geometryLoader.HasCachedGeometry(geom.geometryExpressID))
@@ -57,7 +57,7 @@ std::vector<webifc::IfcFlatMesh> LoadAllTest(webifc::IfcLoader& loader, webifc::
                 auto flatGeom = geometryLoader.GetCachedGeometry(geom.geometryExpressID);
                 flatGeom.GetVertexData();
             }
-            */
+            
 
             meshes.push_back(mesh);
         }
