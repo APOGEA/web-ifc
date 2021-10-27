@@ -80,6 +80,7 @@ export class IfcThree
             const combinedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
             let mat = new THREE.MeshPhongMaterial();
             mat.vertexColors = true;
+            mat.side = THREE.DoubleSide
             const mergedMesh = new THREE.Mesh(combinedGeometry, mat);      
             console.log(mergedMesh);
             scene.add(mergedMesh);
