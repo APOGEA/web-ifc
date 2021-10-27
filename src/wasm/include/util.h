@@ -104,6 +104,9 @@ namespace webifc
 		std::vector<float> fvertexData;
 		std::vector<double> vertexData;
 		std::vector<uint32_t> indexData;
+		glm::dvec3 min = glm::dvec3(DBL_MAX, DBL_MAX, DBL_MAX);
+		glm::dvec3 max = glm::dvec3(-DBL_MAX, -DBL_MAX, -DBL_MAX);
+		bool normalized = false;
 
 		uint32_t numPoints = 0;
 		uint32_t numFaces = 0;
@@ -112,6 +115,24 @@ namespace webifc
 		{
 			glm::dvec3 p = pt;
 			AddPoint(p, n);
+		}
+
+		glm::dvec3 GetExtent()
+		{
+			return max - min;
+		}
+
+		// set all vertices relative to min
+		void Normalize()
+		{
+			for (size_t i = 0; i < vertexData.size(); i += 6)
+			{
+				vertexData[i + 0] = vertexData[i + 0] - min.x;
+				vertexData[i + 1] = vertexData[i + 1] - min.y;
+				vertexData[i + 2] = vertexData[i + 2] - min.z;
+			}
+
+			normalized = true;
 		}
 
 		inline void AddPoint(glm::dvec3& pt, glm::dvec3& n)
@@ -123,6 +144,9 @@ namespace webifc
 			vertexData.push_back(pt.x);
 			vertexData.push_back(pt.y);
 			vertexData.push_back(pt.z);
+
+			min = glm::min(min, pt);
+			max = glm::max(max, pt);
 
 			vertexData.push_back(n.x);
 			vertexData.push_back(n.y);
