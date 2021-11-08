@@ -1682,6 +1682,13 @@ namespace webifc
 
 				std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
 
+				if (indices.size() <= 3)
+				{
+					// probably a degenerate polygon
+					_loader.ReportError({ LoaderErrorType::UNSPECIFIED, "degenerate polygon in extrude" });
+					return geom;
+				}
+
 				uint32_t offset = 0;
 
 				bool winding = GetWindingOfTriangle(geom.GetPoint(offset + indices[0]), geom.GetPoint(offset + indices[1]), geom.GetPoint(offset + indices[2]));
