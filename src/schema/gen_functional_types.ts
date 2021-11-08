@@ -1,5 +1,3 @@
-import { FromRawLineData } from "../ifc2x4_helper";
-
 const fs = require("fs");
 const { type } = require("os");
 

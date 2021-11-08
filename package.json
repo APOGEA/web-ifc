@@ -19,7 +19,7 @@
   },
   "pckg-gui": {},
   "scripts": {
-    "gen-schema": "cd src/schema && node gen.js",
+    "gen-schema": "cd src/schema && node gen_functional_types.js",
     "setup-env": "emsdk_env",
     "build-release": "npm run build-wasm-release && npm run build-api",
     "build-debug": "npm run build-wasm-debug && npm run build-api",
