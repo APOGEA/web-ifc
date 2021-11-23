@@ -38,14 +38,15 @@ export class IfcThree
         }
         */
         let geometries = [];
-        
+        let Geometrylines = [];
+
         this.ifcAPI.StreamAllMeshes(modelID, (mesh: FlatMesh) => {
             // only during the lifetime of this function call, the geometry is available in memory
             const placedGeometries = mesh.geometries;
 
             for (let i = 0; i < placedGeometries.size(); i++)
             {
-                let Geometrylines = [];
+
 
                 const placedGeometry = placedGeometries.get(i);
                 let mesh = this.getPlacedGeometry(modelID, placedGeometry);
@@ -63,17 +64,10 @@ export class IfcThree
                 {
                     geometries.push(geom);
                 }
-
-                if(Geometrylines.length > 0)
-                {
-                    const combinedGeometryLines = BufferGeometryUtils.mergeBufferGeometries(Geometrylines);
-                    let matLines = new THREE.MeshPhongMaterial();
-                    matLines.vertexColors = true;
-                    const mergedLines = new THREE.Line(combinedGeometryLines, matLines);      
-                    scene.add(mergedLines);
-                }
             }
         });
+
+//Les alineacions es representen a nivell del terra mentre que els objectes estan en altura, per això no es veuen els objectes i si les línies.
 
         if(geometries.length > 0)
         {
@@ -84,6 +78,16 @@ export class IfcThree
             const mergedMesh = new THREE.Mesh(combinedGeometry, mat);      
             console.log(mergedMesh);
             scene.add(mergedMesh);
+        }
+
+        if(Geometrylines.length > 0)
+        {
+            const combinedGeometryLines = BufferGeometryUtils.mergeBufferGeometries(Geometrylines);
+            let matLines = new THREE.MeshPhongMaterial();
+            matLines.vertexColors = true;
+            const mergedLines = new THREE.Line(combinedGeometryLines, matLines);   
+            console.log(mergedLines);   
+            scene.add(mergedLines);
         }
 
         console.log(`Uploading took ${ms() - startUploadingTime} ms`);
