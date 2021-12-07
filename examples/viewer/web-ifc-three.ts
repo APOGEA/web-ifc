@@ -24,6 +24,57 @@ export class IfcThree
      * @scene Threejs Scene object
      * @modelID Model handle retrieved by OpenModel, model must not be closed
     */
+
+     public LoadAllAlignments2D(scene: THREE.Scene, modelID: number) {
+
+        const startUploadingTime = ms();
+
+        /*
+        const flatMeshes = this.getFlatMeshes(modelID);
+        for (let i = 0; i < flatMeshes.size(); i++) {
+            // console.log(flatMeshes.get(i).expressID);
+            const placedGeometries = flatMeshes.get(i).geometries;
+            for (let j = 0; j < placedGeometries.size(); j++)
+                scene.add(this.getPlacedGeometry(modelID, placedGeometries.get(j)));
+        }
+        */
+
+        let Geometrylines = [];
+
+        this.ifcAPI.StreamAllMeshes(modelID, (mesh: FlatMesh) => {
+            // only during the lifetime of this function call, the geometry is available in memory
+            const placedGeometries = mesh.geometries;
+            for (let i = 0; i < placedGeometries.size(); i++)
+            {
+                const placedGeometry = placedGeometries.get(i);
+                let mesh = this.getPlacedGeometry(modelID, placedGeometry);
+                let geom = mesh.geometry.applyMatrix4(mesh.matrix);
+                var x1 = geom.attributes.position.array[3];
+                var x2 = geom.attributes.position.array[6];
+                let y1 = geom.attributes.position.array[4];
+                let y2 = geom.attributes.position.array[7];          
+                if ( x1 == x2 && y1 == y2) 
+                {
+                    Geometrylines.push(geom);
+                }
+            }
+        });
+
+        //Les alineacions es representen a nivell del terra mentre que els objectes estan en altura, per això no es veuen els objectes i si les línies.
+
+        if(Geometrylines.length > 0)
+        {
+            const combinedGeometryLines = BufferGeometryUtils.mergeBufferGeometries(Geometrylines);
+            let matLines = new THREE.MeshPhongMaterial();
+            matLines.vertexColors = true;
+            const mergedLines = new THREE.Line(combinedGeometryLines, matLines);   
+            console.log(mergedLines);   
+            scene.add(mergedLines);
+        }
+
+        console.log(`Uploading alignments took ${ms() - startUploadingTime} ms`);
+    }
+
     public LoadAllGeometry(scene: THREE.Scene, modelID: number) {
 
         const startUploadingTime = ms();
@@ -38,27 +89,22 @@ export class IfcThree
         }
         */
         let geometries = [];
-        let Geometrylines = [];
 
         this.ifcAPI.StreamAllMeshes(modelID, (mesh: FlatMesh) => {
             // only during the lifetime of this function call, the geometry is available in memory
             const placedGeometries = mesh.geometries;
-
             for (let i = 0; i < placedGeometries.size(); i++)
             {
-
-
                 const placedGeometry = placedGeometries.get(i);
                 let mesh = this.getPlacedGeometry(modelID, placedGeometry);
                 let geom = mesh.geometry.applyMatrix4(mesh.matrix);
                 var x1 = geom.attributes.position.array[3];
                 var x2 = geom.attributes.position.array[6];
                 let y1 = geom.attributes.position.array[4];
-                let y2 = geom.attributes.position.array[7];
-                
+                let y2 = geom.attributes.position.array[7];          
                 if ( x1 == x2 && y1 == y2) 
                 {
-                    Geometrylines.push(geom);
+
                 }
                 else
                 {
@@ -67,7 +113,7 @@ export class IfcThree
             }
         });
 
-//Les alineacions es representen a nivell del terra mentre que els objectes estan en altura, per això no es veuen els objectes i si les línies.
+        //Les alineacions es representen a nivell del terra mentre que els objectes estan en altura, per això no es veuen els objectes i si les línies.
 
         if(geometries.length > 0)
         {
@@ -78,16 +124,6 @@ export class IfcThree
             const mergedMesh = new THREE.Mesh(combinedGeometry, mat);      
             console.log(mergedMesh);
             scene.add(mergedMesh);
-        }
-
-        if(Geometrylines.length > 0)
-        {
-            const combinedGeometryLines = BufferGeometryUtils.mergeBufferGeometries(Geometrylines);
-            let matLines = new THREE.MeshPhongMaterial();
-            matLines.vertexColors = true;
-            const mergedLines = new THREE.Line(combinedGeometryLines, matLines);   
-            console.log(mergedLines);   
-            scene.add(mergedLines);
         }
 
         console.log(`Uploading took ${ms() - startUploadingTime} ms`);

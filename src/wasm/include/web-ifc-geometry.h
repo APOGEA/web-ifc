@@ -30,7 +30,7 @@ const double EXTRUSION_DISTANCE_HALFSPACE_M = 50;
 
 const bool DEBUG_DUMP_SVG = false;
 
-const static std::unordered_map<std::string, int> curve_type_case{
+const static std::unordered_map<std::string, int> Horizontal_alignment_type{
 	{"LINE", 1},
 	{"CIRCULARARC", 2},
 	{"CLOTHOID", 3},
@@ -40,6 +40,12 @@ const static std::unordered_map<std::string, int> curve_type_case{
 	{"COSINECURVE", 7},
 	{"SINECURVE", 8},
 	{"VIENNESEBEND", 9}};
+
+const static std::unordered_map<std::string, int> Vertical_alignment_type{
+	{"CONSTANTGRADIENT", 1},
+	{"CIRCULARARC", 2},
+	{"PARABOLICARC", 3},
+	{"CLOTHOID", 4}};
 
 struct GeometryStatistics
 {
@@ -304,6 +310,46 @@ namespace webifc
 
 					if (line.ifcType == ifc2x4::IFCALIGNMENTVERTICALSEGMENT)
 					{
+						_loader.MoveToArgumentOffset(line, 2);
+						double StartDistAlong = _loader.GetDoubleArgument();
+
+						_loader.MoveToArgumentOffset(line, 3);
+						double HorizontalLength = _loader.GetDoubleArgument();
+
+						_loader.MoveToArgumentOffset(line, 4);
+						double StartHeight = _loader.GetDoubleArgument();
+
+						_loader.MoveToArgumentOffset(line, 5);
+						double StartGradient = _loader.GetDoubleArgument();
+
+						_loader.MoveToArgumentOffset(line, 6);
+						double EndGradient = _loader.GetDoubleArgument();
+
+						_loader.MoveToArgumentOffset(line, 7);
+						double RadiusOfCurvature = _loader.GetDoubleArgument();
+
+						_loader.MoveToArgumentOffset(line, 8);
+						std::string type = _loader.GetStringArgument();
+
+						switch (Vertical_alignment_type.at(type))
+						{
+						case 1: // CONSTANTGRADIENT
+						{
+							 IfcCurve<2> curve;
+							 glm::dvec4 iPoint = glm::dvec4(StartDistAlong, 0, StartHeight, 1);
+							 glm::dvec4 jPoint = glm::dvec4(StartDistAlong + HorizontalLength, 0, StartHeight + HorizontalLength * StartGradient, 1);
+							 glm::dvec3 Normal = glm::dvec3(0, 0, 1);
+							 IfcGeometry geom;
+							 geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
+							 geom.AddPoint(iPoint, Normal);
+							 geom.AddPoint(jPoint, Normal);
+							 geom.AddPoint(jPoint, Normal);
+							 //_expressIDToGeometry[line.expressID] = geom;
+							 //mesh.expressID = line.expressID;
+							 //mesh.hasGeometry = true;
+							break;
+						}
+						}
 					}
 
 					if (line.ifcType == ifc2x4::IFCALIGNMENTHORIZONTALSEGMENT)
@@ -329,10 +375,8 @@ namespace webifc
 
 						_loader.MoveToArgumentOffset(line, 7);
 						double GravityCenterLineHeight = _loader.GetDoubleArgument();
-
-						IfcProfile profile;
-
-						switch (curve_type_case.at(type))
+						
+						switch (Horizontal_alignment_type.at(type))
 						{
 						case 1: // LINE
 						{
@@ -349,9 +393,9 @@ namespace webifc
 							 geom.AddPoint(iPoint, Normal);
 							 geom.AddPoint(jPoint, Normal);
 							 geom.AddPoint(jPoint, Normal);
-							 _expressIDToGeometry[line.expressID] = geom;
-							 mesh.expressID = line.expressID;
-							 mesh.hasGeometry = true;
+							 //_expressIDToGeometry[line.expressID] = geom;
+							 //mesh.expressID = line.expressID;
+							 //mesh.hasGeometry = true;
 
 							break;
 						}
@@ -380,9 +424,9 @@ namespace webifc
 							 	}
 							 	count++;
 							 }
-							 _expressIDToGeometry[line.expressID] = geom;
-							 mesh.expressID = line.expressID;
-							 mesh.hasGeometry = true;
+							 //_expressIDToGeometry[line.expressID] = geom;
+							 //mesh.expressID = line.expressID;
+							 //mesh.hasGeometry = true;
 
 							break;
 						}

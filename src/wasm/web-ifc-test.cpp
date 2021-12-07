@@ -234,9 +234,9 @@ int main()
     //return 0;
 
 
-    std::string content = ReadFile(L"C:/Users/qmoya/Desktop/PROGRAMES/VSCODE/IFC.JS/webifc/web-ifc/IFCInfra/Tronco4x3.IFC");
-    //std::string content = ReadFile(L"C:/Users/qmoya/Desktop/PROGRAMES/VSCODE/IFC.JS/webifc/web-ifc/IFCInfra/Alignment-12d-4/Alignment-12d-4.ifc");
-    //std::string content = ReadFile(L"C:/Users/qmoya/Desktop/PROGRAMES/VSCODE/IFC.JS/webifc/web-ifc/IFCExamples/Instal.ifc");
+    std::string content = ReadFile(L"C:/Users/qmoya/Desktop/PROGRAMES/VSCODE/IFC.JS/web-ifc/IFCInfra/Tronco4x3.IFC");
+    //std::string content = ReadFile(L"C:/Users/qmoya/Desktop/PROGRAMES/VSCODE/IFC.JS/web-ifc/IFCInfra/Alignment-12d-4/Alignment-12d-4.ifc");
+    //std::string content = ReadFile(L"C:/Users/qmoya/Desktop/PROGRAMES/VSCODE/IFC.JS/web-ifc/IFCExamples/Instal.ifc");
     //std::ofstream outputStream(L"D:/web-ifc/benchmark/ifcfiles/output.ifc");
 
     webifc::LoaderSettings set;
