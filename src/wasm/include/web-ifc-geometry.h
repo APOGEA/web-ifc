@@ -116,15 +116,14 @@ namespace webifc
 					_isCoordinated = true;
 				}
 
-				auto& geom = _expressIDToGeometry[composedMesh.expressID];
-				if (!geom.normalized) geom.Normalize();
+				auto &geom = _expressIDToGeometry[composedMesh.expressID];
+				if (!geom.normalized)
+					geom.Normalize();
 
 				geometry.color = newParentColor;
 				geometry.transformation = _coordinationMatrix * newMatrix * glm::translate(geom.min);
 				geometry.SetFlatTransformation();
 				geometry.geometryExpressID = composedMesh.expressID;
-
-
 
 				flatMesh.geometries.push_back(geometry);
 			}
@@ -331,22 +330,39 @@ namespace webifc
 						_loader.MoveToArgumentOffset(line, 8);
 						std::string type = _loader.GetStringArgument();
 
+						IfcProfile profile;
+
 						switch (Vertical_alignment_type.at(type))
 						{
+						default:
+						{
+							break;
+						}
 						case 1: // CONSTANTGRADIENT
 						{
-							 IfcCurve<2> curve;
-							 glm::dvec4 iPoint = glm::dvec4(StartDistAlong, 0, StartHeight, 1);
-							 glm::dvec4 jPoint = glm::dvec4(StartDistAlong + HorizontalLength, 0, StartHeight + HorizontalLength * StartGradient, 1);
-							 glm::dvec3 Normal = glm::dvec3(0, 0, 1);
-							 IfcGeometry geom;
-							 geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
-							 geom.AddPoint(iPoint, Normal);
-							 geom.AddPoint(jPoint, Normal);
-							 geom.AddPoint(jPoint, Normal);
-							 //_expressIDToGeometry[line.expressID] = geom;
-							 //mesh.expressID = line.expressID;
-							 //mesh.hasGeometry = true;
+							IfcCurve<2> curve;
+							glm::dvec4 iPoint = glm::dvec4(StartDistAlong, 0, StartHeight, 1);
+							glm::dvec4 jPoint = glm::dvec4(StartDistAlong + HorizontalLength, 0, StartHeight + HorizontalLength * StartGradient, 1);
+							glm::dvec3 Normal = glm::dvec3(0, 0, 1);
+
+							glm::dvec4 Normal2D = glm::normalize(glm::dvec4((iPoint.y - jPoint.y), (jPoint.x - iPoint.x), 0, 0));
+							glm::dvec4 StartPoint1 = iPoint + Normal2D * 0.01;
+							glm::dvec4 EndPoint1 = jPoint + Normal2D * 0.01;
+							glm::dvec4 StartPoint2 = iPoint - Normal2D * 0.01;
+							glm::dvec4 EndPoint2 = jPoint - Normal2D * 0.01;
+
+							curve.Add(StartPoint1);
+							curve.Add(EndPoint1);
+							curve.Add(EndPoint2);
+							curve.Add(StartPoint2);
+
+							profile.curve = curve;
+							glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
+
+							IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+							_expressIDToGeometry[line.expressID] = geom;
+							mesh.expressID = line.expressID;
+							mesh.hasGeometry = true;
 							break;
 						}
 						}
@@ -375,58 +391,76 @@ namespace webifc
 
 						_loader.MoveToArgumentOffset(line, 7);
 						double GravityCenterLineHeight = _loader.GetDoubleArgument();
-						
+
+						IfcProfile profile;
+
 						switch (Horizontal_alignment_type.at(type))
 						{
+						default:
+						{
+							break;
+						}
 						case 1: // LINE
 						{
-							 IfcCurve<2> curve;
-							 glm::dvec2 Direction(
-							 	glm::cos(ifcStartDirection),
-							 	glm::sin(ifcStartDirection));
-							 glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
-							 glm::dvec4 iPoint = glm::dvec4(StartPoint.x, StartPoint.y, 0, 1);
-							 glm::dvec4 jPoint = glm::dvec4(EndPoint.x, EndPoint.y, 0, 1);
-							 glm::dvec3 Normal = glm::dvec3(0, 0, 1);
-							 IfcGeometry geom;
-							 geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
-							 geom.AddPoint(iPoint, Normal);
-							 geom.AddPoint(jPoint, Normal);
-							 geom.AddPoint(jPoint, Normal);
-							 //_expressIDToGeometry[line.expressID] = geom;
-							 //mesh.expressID = line.expressID;
-							 //mesh.hasGeometry = true;
+
+							IfcCurve<2> curve;
+							ifcStartDirection = ifcStartDirection;
+							glm::dvec2 Direction(
+								glm::cos(ifcStartDirection),
+								glm::sin(ifcStartDirection));
+							glm::dvec2 EndPoint = StartPoint + Direction * SegmentLength;
+
+							glm::dvec2 Normal2D = glm::normalize(glm::dvec2((StartPoint.y - EndPoint.y), (EndPoint.x - StartPoint.x)));
+							glm::dvec2 StartPoint1 = StartPoint + Normal2D * 0.01;
+							glm::dvec2 EndPoint1 = EndPoint + Normal2D * 0.01;
+							glm::dvec2 StartPoint2 = StartPoint - Normal2D * 0.01;
+							glm::dvec2 EndPoint2 = EndPoint - Normal2D * 0.01;
+
+							curve.Add(StartPoint1);
+							curve.Add(EndPoint1);
+							curve.Add(EndPoint2);
+							curve.Add(StartPoint2);
+
+							profile.curve = curve;
+							glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
+
+							IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+							_expressIDToGeometry[line.expressID] = geom;
+							mesh.expressID = line.expressID;
+							mesh.hasGeometry = true;
 
 							break;
 						}
 						case 2: // Arc
 						{
-							 IfcCurve<2> curve;
-							 double span = (SegmentLength / StartRadiusOfCurvature);
-							 ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
-							 bool sw = true;
-							 auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), ifcStartDirection, ifcStartDirection + span, sw);
-							 glm::dvec2 desp = glm::dvec2(StartPoint.x - curve2D.points[0].x, StartPoint.y - curve2D.points[0].y);
-							 IfcGeometry geom;
-							 int count = 0;
-							 for (auto &pt2D : curve2D.points)
-							 {
-							 	if (count < curve2D.points.size() - 1)
-							 	{
-							 		glm::dvec2 nextPoint = curve2D.points[count + 1];
-							 		glm::dvec4 iPoint = glm::dvec4(pt2D.x + desp.x, pt2D.y + desp.y, 0, 1);
-							 		glm::dvec4 jPoint = glm::dvec4(nextPoint.x + desp.x, nextPoint.y + desp.y, 0, 1);
-							 		glm::dvec3 Normal = glm::dvec3(0, 0, 1);
-							 		geom.AddFace(geom.numPoints, geom.numPoints + 1, geom.numPoints + 2);
-							 		geom.AddPoint(iPoint, Normal);
-							 		geom.AddPoint(jPoint, Normal);
-							 		geom.AddPoint(jPoint, Normal);
-							 	}
-							 	count++;
-							 }
-							 //_expressIDToGeometry[line.expressID] = geom;
-							 //mesh.expressID = line.expressID;
-							 //mesh.hasGeometry = true;
+
+							IfcCurve<2> curve;
+							double span = (SegmentLength / StartRadiusOfCurvature);
+							ifcStartDirection = ifcStartDirection - (CONST_PI / 2);
+
+							bool sw = true;
+							auto curve2D = GetEllipseCurve(StartRadiusOfCurvature, StartRadiusOfCurvature, _loader.GetSettings().CIRCLE_SEGMENTS_MEDIUM, glm::dmat3(1), ifcStartDirection, ifcStartDirection + span, sw);
+							glm::dvec2 desp = glm::dvec2(StartPoint.x - curve2D.points[0].x, StartPoint.y - curve2D.points[0].y);
+
+							for (auto &pt2D : curve2D.points)
+							{
+								glm::dvec2 Normal2D_1 = glm::normalize(glm::dvec2(pt2D.x - StartPoint.x, pt2D.y - StartPoint.y));
+								curve.Add((pt2D + Normal2D_1 * 0.01) + desp);
+							}
+							std::reverse(curve2D.points.begin(), curve2D.points.end());
+							for (auto &pt2D : curve2D.points)
+							{
+								glm::dvec2 Normal2D_1 = glm::normalize(glm::dvec2(pt2D.x - StartPoint.x, pt2D.y - StartPoint.y));
+								curve.Add((pt2D - Normal2D_1 * 0.01) + desp);
+							}
+
+							profile.curve = curve;
+							glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
+
+							IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
+							_expressIDToGeometry[line.expressID] = geom;
+							mesh.expressID = line.expressID;
+							mesh.hasGeometry = true;
 
 							break;
 						}
@@ -1725,7 +1759,7 @@ namespace webifc
 				if (indices.size() <= 3)
 				{
 					// probably a degenerate polygon
-					_loader.ReportError({ LoaderErrorType::UNSPECIFIED, "degenerate polygon in extrude" });
+					_loader.ReportError({LoaderErrorType::UNSPECIFIED, "degenerate polygon in extrude"});
 					return geom;
 				}
 

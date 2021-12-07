@@ -88,43 +88,27 @@ export class IfcThree
                 scene.add(this.getPlacedGeometry(modelID, placedGeometries.get(j)));
         }
         */
+
         let geometries = [];
 
         this.ifcAPI.StreamAllMeshes(modelID, (mesh: FlatMesh) => {
             // only during the lifetime of this function call, the geometry is available in memory
             const placedGeometries = mesh.geometries;
+
             for (let i = 0; i < placedGeometries.size(); i++)
             {
                 const placedGeometry = placedGeometries.get(i);
                 let mesh = this.getPlacedGeometry(modelID, placedGeometry);
                 let geom = mesh.geometry.applyMatrix4(mesh.matrix);
-                var x1 = geom.attributes.position.array[3];
-                var x2 = geom.attributes.position.array[6];
-                let y1 = geom.attributes.position.array[4];
-                let y2 = geom.attributes.position.array[7];          
-                if ( x1 == x2 && y1 == y2) 
-                {
-
-                }
-                else
-                {
-                    geometries.push(geom);
-                }
+                geometries.push(geom);
             }
         });
 
-        //Les alineacions es representen a nivell del terra mentre que els objectes estan en altura, per això no es veuen els objectes i si les línies.
-
-        if(geometries.length > 0)
-        {
-            const combinedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
-            let mat = new THREE.MeshPhongMaterial();
-            mat.vertexColors = true;
-            mat.side = THREE.DoubleSide
-            const mergedMesh = new THREE.Mesh(combinedGeometry, mat);      
-            console.log(mergedMesh);
-            scene.add(mergedMesh);
-        }
+        const combinedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+        let mat = new THREE.MeshPhongMaterial();
+        mat.vertexColors = true;
+        const mergedMesh = new THREE.Mesh(combinedGeometry, mat);
+        scene.add(mergedMesh);
 
         console.log(`Uploading took ${ms() - startUploadingTime} ms`);
     }
