@@ -341,6 +341,7 @@ namespace webifc
 						case 1: // CONSTANTGRADIENT
 						{
 							IfcCurve<2> curve;
+							
 							glm::dvec4 iPoint = glm::dvec4(StartDistAlong, 0, StartHeight, 1);
 							glm::dvec4 jPoint = glm::dvec4(StartDistAlong + HorizontalLength, 0, StartHeight + HorizontalLength * StartGradient, 1);
 							glm::dvec3 Normal = glm::dvec3(0, 0, 1);
@@ -425,9 +426,9 @@ namespace webifc
 							glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
 
 							IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
-							_expressIDToGeometry[line.expressID] = geom;
-							mesh.expressID = line.expressID;
-							mesh.hasGeometry = true;
+							//_expressIDToGeometry[line.expressID] = geom;
+							//mesh.expressID = line.expressID;
+							//mesh.hasGeometry = true;
 
 							break;
 						}
@@ -458,9 +459,9 @@ namespace webifc
 							glm::dvec3 extrusionNormal = glm::dvec3(0, 0, 1);
 
 							IfcGeometry geom = Extrude(profile, extrusionNormal, 1);
-							_expressIDToGeometry[line.expressID] = geom;
-							mesh.expressID = line.expressID;
-							mesh.hasGeometry = true;
+							//_expressIDToGeometry[line.expressID] = geom;
+							//mesh.expressID = line.expressID;
+							//mesh.hasGeometry = true;
 
 							break;
 						}
